@@ -205,6 +205,24 @@ impl<T> Field<T> {
             .collect();
         self.set_line(axis, index, merged_line).unwrap()
     }
+
+    // Other //
+
+    pub fn find_all<P>(&self, predicate: P) -> Vec<Coordinate>
+    where
+        P: Fn(&T) -> bool,
+    {
+        self.get_grid()
+            .iter()
+            .enumerate()
+            .flat_map(|(row, line)| {
+                line.iter()
+                    .enumerate()
+                    .filter(|(_, val)| predicate(val))
+                    .map(move |(column, _)| Coordinate { row, column })
+            })
+            .collect()
+    }
 }
 
 pub struct FieldLineIterator<'a, T: Clone> {
