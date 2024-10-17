@@ -153,9 +153,7 @@ fn gen_basic_ship_counts(shots: &Field<ShotStatus>, ship_length: usize) -> (Fiel
             let (counts_line, ship_count) =
                 gen_line(&get_bool_shots_line(shots, axis, index), ship_length);
 
-            ship_counts
-                .add_line(axis, index, &counts_line)
-                .expect("Unable to add ship count line to ship count field.");
+            ship_counts.merge_line(axis, index, &counts_line, |this, other| this + other);
 
             total_ship_count += ship_count;
         }
@@ -177,9 +175,12 @@ fn gen_hits_ship_counts(shots: &Field<ShotStatus>, ship_length: usize) -> (Field
             );
 
             let (counts_line, ship_count) = gen_line(&masked_bool_shots_line, ship_length);
-            ship_counts
-                .add_line(axis, hit.get_axis_index(axis), &counts_line)
-                .expect("Unable to add ship count line to ship count field.");
+            ship_counts.merge_line(
+                axis,
+                hit.get_axis_index(axis),
+                &counts_line,
+                |this, other| this + other,
+            );
 
             total_ship_count += ship_count;
         }
