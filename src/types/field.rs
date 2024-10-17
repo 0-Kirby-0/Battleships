@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::fmt::Debug;
+
 use crate::types::{Axis, Coordinate};
 use anyhow::{Ok, Result};
 
@@ -87,6 +89,16 @@ impl<T> Field<T> {
         }
     }
 
+    pub fn get_lines_context(&self, coord: Coordinate) -> (Vec<T>, Vec<T>)
+    where
+        T: Clone,
+    {
+        (
+            self.get_line(Axis::Row, coord.row).unwrap(),
+            self.get_line(Axis::Column, coord.column).unwrap(),
+        )
+    }
+
     pub fn set_line(&mut self, axis: Axis, index: usize, line: Vec<T>) -> Result<()>
     where
         T: Clone,
@@ -162,19 +174,29 @@ impl<T> Field<T> {
     pub fn transform_by_line<F, R>(&self, transform: F) -> (Field<R>, Field<R>)
     where
         T: Clone,
+        R: Clone,
         F: Fn(Vec<T>) -> Vec<R>,
     {
-        let rows = self.line_iterator(Axis::Row).map(&transform).collect();
-        let columns = self.line_iterator(Axis::Column).map(&transform).collect();
+        let rows = self
+            .line_iterator(Axis::Row)
+            .map(&transform)
+            .collect::<Vec<_>>();
 
-        (Field::new_from_grid(rows), Field::new_from_grid(columns))
+        let row_field = Field::new_from_grid(rows.clone());
+        let mut column_field = Field::new_from_grid(rows);
+
+        for (index, column) in self.line_iterator(Axis::Column).map(&transform).enumerate() {
+            column_field.set_line(Axis::Column, index, column).unwrap();
+        }
+
+        (row_field, column_field)
     }
 
     // Merging //
 
-    pub fn merge_fields<F, R>(&self, other: &Field<T>, merge: F) -> Field<R>
+    pub fn merge_fields<F, O, R>(&self, other: &Field<O>, merge: F) -> Field<R>
     where
-        F: Fn(&T, &T) -> R,
+        F: Fn(&T, &O) -> R,
     {
         let merged = self
             .get_grid()
@@ -222,6 +244,19 @@ impl<T> Field<T> {
                     .map(move |(column, _)| Coordinate { row, column })
             })
             .collect()
+    }
+
+    pub fn debug_print(&self)
+    where
+        T: Debug,
+    {
+        println!("Debug Printing:");
+        for line in self.get_grid() {
+            for val in line {
+                print!("[{:?}]", val)
+            }
+            println!();
+        }
     }
 }
 
