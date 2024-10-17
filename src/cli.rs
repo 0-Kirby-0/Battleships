@@ -1,6 +1,9 @@
-use crate::types::Argument::{Known, Unknown};
+use crate::state;
+use crate::types::action::{
+    Action,
+    Argument::{Known, Unknown},
+};
 use crate::types::Coordinate;
-use crate::{state, types::Action};
 use anyhow::{Ok, Result};
 use std::io::Write;
 use strum::IntoEnumIterator;

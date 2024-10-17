@@ -1,11 +1,8 @@
 use crate::types::field::Field;
 use crate::heatmap;
-use crate::types::{Axis, Action, Coordinate, ShotStatus};
-use crate::types::Argument::{Known, Unknown};
-
+use crate::types::{Axis, Coordinate, ShotStatus};
+use crate::types::action::{Action, Argument::{Known, Unknown}};
 use anyhow::{anyhow, Ok, Result};
-
-
 
 pub struct State {
     shots: Field<ShotStatus>,
