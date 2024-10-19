@@ -3,7 +3,7 @@ use crate::types::action::{
     Action,
     Argument::{Known, Unknown},
 };
-use crate::types::Coordinate;
+use crate::types::{Coordinate, Printable};
 use anyhow::{Ok, Result};
 use std::io::Write;
 use strum::IntoEnumIterator;

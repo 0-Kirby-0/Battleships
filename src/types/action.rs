@@ -1,5 +1,6 @@
 use Argument::{Known, Unknown};
 use crate::types::Coordinate;
+use crate::types::Printable;
 use strum_macros::EnumIter;
 
 #[derive(Clone, Copy, Default)]

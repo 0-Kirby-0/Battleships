@@ -1,5 +1,6 @@
 use super::*;
-use crate::types::field::Field;
+use field::helpers::Axis;
+use field::Field;
 
 /*
 ** The following function has a failure mode which means one of two things, and we can't know which:
@@ -46,18 +47,20 @@ fn gen_ship_counts(bool_shots: &Field<bool>, ship_length: usize) -> (Field<usize
     //this workaround is necessary to calm it down.
     let total_ship_count = std::cell::RefCell::new(0);
 
-    let (rows, columns) = bool_shots.transform_by_line(|line| {
+    let ship_counter = |line: Vec<bool>| {
         let (ship_count_line, ship_count) = gen_line(&line, ship_length);
         *total_ship_count.borrow_mut() += ship_count;
         ship_count_line
-    });
+    };
 
-    println!("Rows for {ship_length}:");
-    rows.debug_print();
-    println!("Columns for {ship_length}:");
-    columns.debug_print();
+    let rows = bool_shots
+        .transform_by_line(Axis::Row, ship_counter)
+        .unwrap();
+    let columns = bool_shots
+        .transform_by_line(Axis::Column, ship_counter)
+        .unwrap();
 
-    let ship_counts = rows.merge_fields(&columns, |row_val, column_val| row_val + column_val);
+    let ship_counts = rows.merge_field(&columns, |row_val, column_val| row_val + column_val);
 
     //dropping the refcell and returning its content
     let total_ship_count = *total_ship_count.borrow();

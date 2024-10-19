@@ -1,8 +1,8 @@
 mod base;
 mod hit;
 
-use crate::types::field::Field;
 use crate::types::ShotStatus;
+use field::Field;
 
 pub fn gen_heat_field(shots: &Field<ShotStatus>, ship_lengths: &[usize]) -> Field<f32> {
     let bool_shots = shots.transform_all(|&status| status.can_contain_ship());
@@ -21,13 +21,13 @@ pub fn gen_heat_field(shots: &Field<ShotStatus>, ship_lengths: &[usize]) -> Fiel
 fn reduce_heat_fields(fields: impl Iterator<Item = Field<f32>>) -> Field<f32> {
     fields
         .map(|field| field.transform_all(|val| 1. - val))
-        .reduce(|acc, e| acc.merge_fields(&e, |acc_val, e_val| acc_val * e_val))
+        .reduce(|acc, e| acc.merge_field(&e, |acc_val, e_val| acc_val * e_val))
         .unwrap()
         .transform_all(|val| 1. - val)
 }
 
 fn mask_heat_field(heat: &Field<f32>, shots: &Field<ShotStatus>) -> Field<f32> {
-    heat.merge_fields(shots, |&heat_val, status| match status {
+    heat.merge_field(shots, |&heat_val, status| match status {
         ShotStatus::Hit | ShotStatus::Miss | ShotStatus::Sunk => 0.,
         ShotStatus::Untested => heat_val,
     })

@@ -1,6 +1,6 @@
 use super::*;
-use crate::types::field::Field;
-use crate::types::{Axis, Coordinate};
+use crate::types::Coordinate;
+use field::{helpers::Axis, Field};
 
 pub(super) fn gen_heat(
     bool_shots: &Field<bool>,
@@ -22,7 +22,7 @@ pub(super) fn gen_heat(
 fn gen_ship_heat(bool_shots: &Field<bool>, hits: &[Coordinate], ship_length: usize) -> Field<f32> {
     let mut heat = Field::new_default(bool_shots.width(), bool_shots.height());
     for &hit in hits {
-        let (row, column) = bool_shots.get_lines_context(hit);
+        let (row, column) = bool_shots.get_lines_context(hit).unwrap();
 
         let (row_ship_count_line, row_ship_count) =
             gen_line(&mask_around_hit(&row, hit.column, ship_length), ship_length);
@@ -35,8 +35,10 @@ fn gen_ship_heat(bool_shots: &Field<bool>, hits: &[Coordinate], ship_length: usi
             let row_heat = ship_counts_to_heat(&row_ship_count_line, total_ship_count);
             let column_heat = ship_counts_to_heat(&column_ship_count_line, total_ship_count);
 
-            heat.merge_line(Axis::Row, hit.row, &row_heat, |acc, e| acc + e);
-            heat.merge_line(Axis::Column, hit.column, &column_heat, |acc, e| acc + e);
+            heat.merge_line(Axis::Row, hit.row, &row_heat, |acc, e| acc + e)
+                .unwrap();
+            heat.merge_line(Axis::Column, hit.column, &column_heat, |acc, e| acc + e)
+                .unwrap();
         }
         //should there be no ships, avoid the div/0 but otherwise don't worry about it
     }

@@ -1,6 +1,6 @@
-use crate::types::field::Field;
+use field::{Field, helpers::{Axis, Coordinate}};
 use crate::heatmap;
-use crate::types::{Axis, Coordinate, ShotStatus};
+use crate::types::{ShotStatus, Printable};
 use crate::types::action::{Action, Argument::{Known, Unknown}};
 use anyhow::{anyhow, Ok, Result};
 
